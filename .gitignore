@@ -1,0 +1,6 @@
+*.bin
+*.elf
+*.img
+*.o
+# Project exclude paths
+/cmake-build-debug/
