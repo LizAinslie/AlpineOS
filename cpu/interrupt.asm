@@ -1,379 +1,262 @@
-; Defined in isr.c
-[extern isr_handler]
-[extern irq_handler]
+%macro push_all 0
+    push rax
+    push rcx
+    push rdx
+    push rbx
+    push rsp
+    push rbp
+    push rsi
+    push rdi
+%endmacro
 
-; Common ISR code
-isr_common_stub:
-    ; 1. Save CPU state
-	pusha ; Pushes edi,esi,ebp,esp,ebx,edx,ecx,eax
-	mov ax, ds ; Lower 16-bits of eax = ds.
-	push eax ; save the data segment descriptor
-	mov ax, 0x10  ; kernel data segment descriptor
-	mov ds, ax
-	mov es, ax
-	mov fs, ax
-	mov gs, ax
-	push esp ; registers_t *r
-    ; 2. Call C handler
-    cld ; C code following the sysV ABI requires DF to be clear on function entry
-	call isr_handler
+%macro pop_all 0
+    pop rdi
+    pop rsi
+    pop rbp
+    pop rsp
+    pop rbx
+    pop rdx
+    pop rcx
+    pop rax
+%endmacro
 
-    ; 3. Restore state
-	pop eax
-    pop eax
-	mov ds, ax
-	mov es, ax
-	mov fs, ax
-	mov gs, ax
-	popa
-	add esp, 8 ; Cleans up the pushed error code and pushed ISR number
-	iret ; pops 5 things at once: CS, EIP, EFLAGS, SS, and ESP
-
-; Common IRQ code. Identical to ISR code except for the 'call'
-; and the 'pop ebx'
-irq_common_stub:
-    pusha
+extern isr_handler
+isr_handler_wrapper:
+    mov rcx, 10
+    push_all
     mov ax, ds
-    push eax
-    mov ax, 0x10
-    mov ds, ax
-    mov es, ax
-    mov fs, ax
-    mov gs, ax
-    push esp
-    cld
-    call irq_handler ; Different than the ISR code
-    pop ebx  ; Different than the ISR code
-    pop ebx
-    mov ds, bx
-    mov es, bx
-    mov fs, bx
-    mov gs, bx
-    popa
-    add esp, 8
-    iret
+    push rax
 
-; We don't get information about which interrupt was caller
-; when the handler is run, so we will need to have a different handler
-; for every interrupt.
-; Furthermore, some interrupts push an error code onto the stack but others
-; don't, so we will push a dummy error code for those which don't, so that
-; we have a consistent stack for all of them.
+    call isr_handler
 
-; First make the ISRs global
-global isr0
-global isr1
-global isr2
-global isr3
-global isr4
-global isr5
-global isr6
-global isr7
-global isr8
-global isr9
-global isr10
-global isr11
-global isr12
-global isr13
-global isr14
-global isr15
-global isr16
-global isr17
-global isr18
-global isr19
-global isr20
-global isr21
-global isr22
-global isr23
-global isr24
-global isr25
-global isr26
-global isr27
-global isr28
-global isr29
-global isr30
-global isr31
-; IRQs
-global irq0
-global irq1
-global irq2
-global irq3
-global irq4
-global irq5
-global irq6
-global irq7
-global irq8
-global irq9
-global irq10
-global irq11
-global irq12
-global irq13
-global irq14
-global irq15
+    pop rax
 
-; 0: Divide By Zero Exception
-isr0:
+    pop_all
+    add rsp, 16
+    sti
+    iretq
+
+global load_idt
+extern idt_handlers_pointer
+load_idt:
+    lidt [idt_handlers_pointer]
+    ret
+
+global isr_handler_0
+global isr_handler_1
+global isr_handler_2
+global isr_handler_3
+global isr_handler_4
+global isr_handler_5
+global isr_handler_6
+global isr_handler_7
+global isr_handler_8
+global isr_handler_9
+global isr_handler_10
+global isr_handler_11
+global isr_handler_12
+global isr_handler_13
+global isr_handler_14
+global isr_handler_15
+global isr_handler_16
+global isr_handler_17
+global isr_handler_18
+global isr_handler_19
+global isr_handler_20
+global isr_handler_21
+global isr_handler_22
+global isr_handler_23
+global isr_handler_24
+global isr_handler_25
+global isr_handler_26
+global isr_handler_27
+global isr_handler_28
+global isr_handler_29
+global isr_handler_30
+global isr_handler_31
+
+isr_handler_0:
+    cli
     push byte 0
     push byte 0
-    jmp isr_common_stub
+    jmp isr_handler_wrapper
 
-; 1: Debug Exception
-isr1:
+isr_handler_1:
+    cli
     push byte 0
     push byte 1
-    jmp isr_common_stub
+    jmp isr_handler_wrapper
 
-; 2: Non Maskable Interrupt Exception
-isr2:
+isr_handler_2:
+    cli
     push byte 0
     push byte 2
-    jmp isr_common_stub
+    jmp isr_handler_wrapper
 
-; 3: Int 3 Exception
-isr3:
+isr_handler_3:
+    cli
     push byte 0
     push byte 3
-    jmp isr_common_stub
+    jmp isr_handler_wrapper
 
-; 4: INTO Exception
-isr4:
+isr_handler_4:
+    cli
     push byte 0
     push byte 4
-    jmp isr_common_stub
+    jmp isr_handler_wrapper
 
-; 5: Out of Bounds Exception
-isr5:
+isr_handler_5:
+    cli
     push byte 0
     push byte 5
-    jmp isr_common_stub
+    jmp isr_handler_wrapper
 
-; 6: Invalid Opcode Exception
-isr6:
+isr_handler_6:
+    cli
     push byte 0
     push byte 6
-    jmp isr_common_stub
+    jmp isr_handler_wrapper
 
-; 7: Coprocessor Not Available Exception
-isr7:
+isr_handler_7:
+    cli
     push byte 0
     push byte 7
-    jmp isr_common_stub
+    jmp isr_handler_wrapper
 
-; 8: Double Fault Exception (With Error Code!)
-isr8:
+isr_handler_8:
+    cli
     push byte 8
-    jmp isr_common_stub
+    jmp isr_handler_wrapper
 
-; 9: Coprocessor Segment Overrun Exception
-isr9:
+isr_handler_9:
+    cli
     push byte 0
     push byte 9
-    jmp isr_common_stub
+    jmp isr_handler_wrapper
 
-; 10: Bad TSS Exception (With Error Code!)
-isr10:
+isr_handler_10:
+    cli
     push byte 10
-    jmp isr_common_stub
+    jmp isr_handler_wrapper
 
-; 11: Segment Not Present Exception (With Error Code!)
-isr11:
+isr_handler_11:
+    cli
     push byte 11
-    jmp isr_common_stub
+    jmp isr_handler_wrapper
 
-; 12: Stack Fault Exception (With Error Code!)
-isr12:
+isr_handler_12:
+    cli
     push byte 12
-    jmp isr_common_stub
+    jmp isr_handler_wrapper
 
-; 13: General Protection Fault Exception (With Error Code!)
-isr13:
+isr_handler_13:
+    cli
     push byte 13
-    jmp isr_common_stub
+    jmp isr_handler_wrapper
 
-; 14: Page Fault Exception (With Error Code!)
-isr14:
+isr_handler_14:
+    cli
     push byte 14
-    jmp isr_common_stub
+    jmp isr_handler_wrapper
 
-; 15: Reserved Exception
-isr15:
+isr_handler_15:
+    cli
     push byte 0
     push byte 15
-    jmp isr_common_stub
+    jmp isr_handler_wrapper
 
-; 16: Floating Point Exception
-isr16:
+isr_handler_16:
+    cli
     push byte 0
     push byte 16
-    jmp isr_common_stub
+    jmp isr_handler_wrapper
 
-; 17: Alignment Check Exception
-isr17:
+isr_handler_17:
+    cli
     push byte 0
     push byte 17
-    jmp isr_common_stub
+    jmp isr_handler_wrapper
 
-; 18: Machine Check Exception
-isr18:
+isr_handler_18:
+    cli
     push byte 0
     push byte 18
-    jmp isr_common_stub
+    jmp isr_handler_wrapper
 
-; 19: Reserved
-isr19:
+isr_handler_19:
+    cli
     push byte 0
     push byte 19
-    jmp isr_common_stub
+    jmp isr_handler_wrapper
 
-; 20: Reserved
-isr20:
+isr_handler_20:
+    cli
     push byte 0
     push byte 20
-    jmp isr_common_stub
+    jmp isr_handler_wrapper
 
-; 21: Reserved
-isr21:
+isr_handler_21:
+    cli
     push byte 0
     push byte 21
-    jmp isr_common_stub
+    jmp isr_handler_wrapper
 
-; 22: Reserved
-isr22:
+isr_handler_22:
+    cli
     push byte 0
     push byte 22
-    jmp isr_common_stub
+    jmp isr_handler_wrapper
 
-; 23: Reserved
-isr23:
+isr_handler_23:
+    cli
     push byte 0
     push byte 23
-    jmp isr_common_stub
+    jmp isr_handler_wrapper
 
-; 24: Reserved
-isr24:
+isr_handler_24:
+    cli
     push byte 0
     push byte 24
-    jmp isr_common_stub
+    jmp isr_handler_wrapper
 
-; 25: Reserved
-isr25:
+isr_handler_25:
+    cli
     push byte 0
     push byte 25
-    jmp isr_common_stub
+    jmp isr_handler_wrapper
 
-; 26: Reserved
-isr26:
+isr_handler_26:
+    cli
     push byte 0
     push byte 26
-    jmp isr_common_stub
+    jmp isr_handler_wrapper
 
-; 27: Reserved
-isr27:
+isr_handler_27:
+    cli
     push byte 0
     push byte 27
-    jmp isr_common_stub
+    jmp isr_handler_wrapper
 
-; 28: Reserved
-isr28:
+isr_handler_28:
+    cli
     push byte 0
     push byte 28
-    jmp isr_common_stub
+    jmp isr_handler_wrapper
 
-; 29: Reserved
-isr29:
+isr_handler_29:
+    cli
     push byte 0
     push byte 29
-    jmp isr_common_stub
+    jmp isr_handler_wrapper
 
-; 30: Reserved
-isr30:
+isr_handler_30:
+    cli
     push byte 0
     push byte 30
-    jmp isr_common_stub
+    jmp isr_handler_wrapper
 
-; 31: Reserved
-isr31:
+isr_handler_31:
+    cli
     push byte 0
     push byte 31
-    jmp isr_common_stub
-
-; IRQ handlers
-irq0:
-	push byte 0
-	push byte 32
-	jmp irq_common_stub
-
-irq1:
-	push byte 1
-	push byte 33
-	jmp irq_common_stub
-
-irq2:
-	push byte 2
-	push byte 34
-	jmp irq_common_stub
-
-irq3:
-	push byte 3
-	push byte 35
-	jmp irq_common_stub
-
-irq4:
-	push byte 4
-	push byte 36
-	jmp irq_common_stub
-
-irq5:
-	push byte 5
-	push byte 37
-	jmp irq_common_stub
-
-irq6:
-	push byte 6
-	push byte 38
-	jmp irq_common_stub
-
-irq7:
-	push byte 7
-	push byte 39
-	jmp irq_common_stub
-
-irq8:
-	push byte 8
-	push byte 40
-	jmp irq_common_stub
-
-irq9:
-	push byte 9
-	push byte 41
-	jmp irq_common_stub
-
-irq10:
-	push byte 10
-	push byte 42
-	jmp irq_common_stub
-
-irq11:
-	push byte 11
-	push byte 43
-	jmp irq_common_stub
-
-irq12:
-	push byte 12
-	push byte 44
-	jmp irq_common_stub
-
-irq13:
-	push byte 13
-	push byte 45
-	jmp irq_common_stub
-
-irq14:
-	push byte 14
-	push byte 46
-	jmp irq_common_stub
-
-irq15:
-	push byte 15
-	push byte 47
-	jmp irq_common_stub
+    jmp isr_handler_wrapper

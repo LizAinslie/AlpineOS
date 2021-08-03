@@ -3,34 +3,66 @@
 
 #include <stdint.h>
 
-/* Segment selectors */
-#define KERNEL_CS 0x08
-
-/* How every interrupt gate (handler) is defined */
 typedef struct {
-    uint16_t low_offset; /* Lower 16 bits of handler function address */
-    uint16_t sel; /* Kernel segment selector */
+    uint16_t lowOffset;
+    uint16_t selector;
     uint8_t always0;
-    /* First byte
-     * Bit 7: "Interrupt is present"
-     * Bits 6-5: Privilege level of caller (0=kernel..3=user)
-     * Bit 4: Set to 0 for interrupt gates
-     * Bits 3-0: bits 1110 = decimal 14 = "32 bit interrupt gate" */
     uint8_t flags;
-    uint16_t high_offset; /* Higher 16 bits of handler function address */
-} __attribute__((packed)) idt_gate_t ;
+    uint16_t middleOffset;
+    uint32_t highOffset;
+    uint32_t reserved;
+} __attribute__((packed)) idt_entry_t;
 
-/* A pointer to the array of interrupt handlers.
- * Assembly instruction 'lidt' will read it */
 typedef struct {
     uint16_t limit;
-    uint32_t base;
-} __attribute__((packed)) idt_register_t;
+    uint64_t base;
+} __attribute__((packed)) idt_handlers_pointer_t;
 
-#define IDT_ENTRIES 256
+typedef struct {
+    uint64_t ds;
+    uint64_t rdi, rsi, rbp, rsp, rbx, rdx, rcx, rax;
+    uint64_t intNum, errorCode;
+    uint64_t rip, cs, eflags, useresp, ss;
+} registers_t;
 
-/* Functions implemented in idt.c */
-void set_idt_gate(int n, uint32_t handler);
-void set_idt();
+extern void isr_handler(registers_t registers);
+
+extern void isr_handler_0(void);
+extern void isr_handler_1(void);
+extern void isr_handler_2(void);
+extern void isr_handler_3(void);
+extern void isr_handler_4(void);
+extern void isr_handler_5(void);
+extern void isr_handler_6(void);
+extern void isr_handler_7(void);
+extern void isr_handler_8(void);
+extern void isr_handler_9(void);
+extern void isr_handler_10(void);
+extern void isr_handler_11(void);
+extern void isr_handler_12(void);
+extern void isr_handler_13(void);
+extern void isr_handler_14(void);
+extern void isr_handler_15(void);
+extern void isr_handler_16(void);
+extern void isr_handler_17(void);
+extern void isr_handler_18(void);
+extern void isr_handler_19(void);
+extern void isr_handler_20(void);
+extern void isr_handler_21(void);
+extern void isr_handler_22(void);
+extern void isr_handler_23(void);
+extern void isr_handler_24(void);
+extern void isr_handler_25(void);
+extern void isr_handler_26(void);
+extern void isr_handler_27(void);
+extern void isr_handler_28(void);
+extern void isr_handler_29(void);
+extern void isr_handler_30(void);
+extern void isr_handler_31(void);
+
+extern void load_idt(void);
+
+void set_idt_handler(uint32_t num, uint64_t handler);
+void init_idt(void);
 
 #endif
