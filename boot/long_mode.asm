@@ -1,4 +1,4 @@
-[bits 16]
+bits 16
 
 switch_to_lm:
     cli ; Disable Interrupts
@@ -15,7 +15,7 @@ switch_to_lm:
         or dword [0x3000 + ecx], 111b
         mov dword [0x3000 + ecx + 4], 0
 
-        mov eax, (4096/8)
+        mov eax, (4096 / 8)
         mul ecx
         mov dword [0x4000 + ecx], eax
         or dword [0x4000 + ecx], 111b
@@ -48,7 +48,7 @@ switch_to_lm:
     lgdt [gdt.pointer]                ; Load GDT.Pointer defined below.
     jmp gdt.code_seg:init_lm             ; Load CS with 64 bit segment and flush the instruction cache
 
-[bits 64]
+bits 64
 init_lm:
     mov ax, gdt.data_seg
     mov ds, ax

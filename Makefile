@@ -23,11 +23,11 @@ kernel.elf: boot/kernel_entry.o ${OBJ}
 	x86_64-elf-ld -o $@ -T link.lds $^ --oformat default
 
 run: PearOS-image.bin
-	qemu-system-x86_64 -enable-kvm -cpu host -drive format=raw,if=floppy,file=PearOS-image.bin
+	qemu-system-x86_64 -soundhw pcspk -enable-kvm -cpu host -drive format=raw,if=floppy,file=PearOS-image.bin
 
 # Open the connection to qemu and load our kernel-object file with symbols
 debug: PearOS-image.bin kernel.elf
-	qemu-system-x86_64 -enable-kvm -cpu host -s -S -drive format=raw,if=floppy,file=PearOS-image.bin -d guest_errors &
+	qemu-system-x86_64 -soundhw pcspk -enable-kvm -cpu host -s -S -drive format=raw,if=floppy,file=PearOS-image.bin -d guest_errors &
 	${GDB} -ex "target remote localhost:1234" -ex "symbol-file kernel.elf"
 
 # Generic rules for wildcards

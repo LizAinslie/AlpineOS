@@ -33,7 +33,23 @@ isr_handler_wrapper:
 
     pop_all
     add rsp, 16
-    sti
+    ;sti
+    iretq
+
+extern irq_handler
+irq_handler_wrapper:
+    mov rcx, 10
+    push_all
+    mov ax, ds
+    push rbx
+
+    call irq_handler
+
+    pop rbx
+
+    pop_all
+    add rsp, 16
+    ;sti
     iretq
 
 global load_idt
@@ -74,6 +90,24 @@ global isr_handler_28
 global isr_handler_29
 global isr_handler_30
 global isr_handler_31
+
+; IRQs
+global irq_0
+global irq_1
+global irq_2
+global irq_3
+global irq_4
+global irq_5
+global irq_6
+global irq_7
+global irq_8
+global irq_9
+global irq_10
+global irq_11
+global irq_12
+global irq_13
+global irq_14
+global irq_15
 
 isr_handler_0:
     cli
@@ -253,6 +287,7 @@ isr_handler_30:
     cli
     push byte 0
     push byte 30
+
     jmp isr_handler_wrapper
 
 isr_handler_31:
@@ -260,3 +295,84 @@ isr_handler_31:
     push byte 0
     push byte 31
     jmp isr_handler_wrapper
+
+; IRQ handlers
+irq_0:
+	push byte 0
+	push byte 32
+	jmp irq_handler_wrapper
+
+irq_1:
+	push byte 1
+	push byte 33
+	jmp irq_handler_wrapper
+
+irq_2:
+	push byte 2
+	push byte 34
+	jmp irq_handler_wrapper
+
+irq_3:
+	push byte 3
+	push byte 35
+	jmp irq_handler_wrapper
+
+irq_4:
+	push byte 4
+	push byte 36
+	jmp irq_handler_wrapper
+
+irq_5:
+	push byte 5
+	push byte 37
+	jmp irq_handler_wrapper
+
+irq_6:
+	push byte 6
+	push byte 38
+	jmp irq_handler_wrapper
+
+irq_7:
+	push byte 7
+	push byte 39
+	jmp irq_handler_wrapper
+
+irq_8:
+	push byte 8
+	push byte 40
+	jmp irq_handler_wrapper
+
+irq_9:
+	push byte 9
+	push byte 41
+	jmp irq_handler_wrapper
+
+irq_10:
+	push byte 10
+	push byte 42
+	jmp irq_handler_wrapper
+
+irq_11:
+	push byte 11
+	push byte 43
+	jmp irq_handler_wrapper
+
+irq_12:
+	push byte 12
+	push byte 44
+	jmp irq_handler_wrapper
+
+irq_13:
+	push byte 13
+	push byte 45
+	jmp irq_handler_wrapper
+
+irq_14:
+	push byte 14
+	push byte 46
+	jmp irq_handler_wrapper
+
+irq_15:
+	push byte 15
+	push byte 47
+	jmp irq_handler_wrapper

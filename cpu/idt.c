@@ -1,7 +1,17 @@
 #include "idt.h"
 
+#include "ports.h"
+#include "timer.h"
+
+#include "../libc/string.h"
+
+#include "../drivers/keyboard.h"
+#include "../drivers/monitor.h"
+
 idt_entry_t idt_handlers[256];
 idt_handlers_pointer_t idt_handlers_pointer;
+
+isr_t isr_handlers[256];
 
 const char* exception_messages[32] = {
         "Division By Zero",
@@ -38,9 +48,15 @@ const char* exception_messages[32] = {
         "Reserved"
 };
 
-void isr_handler(registers_t registers) {
-    if(registers.intNum < 32) {
-//        error("Exception: %s Identifier: %ld", exception_messages[registers.intNum], registers.intNum);
+void isr_handler(registers_t r) {
+    if(r.intNum < 32) {
+        kprint("received interrupt: ");
+        char s[3];
+        int_to_ascii(r.intNum, s);
+        kprint(s);
+        kprint(" - ");
+        kprint(exception_messages[r.intNum]);
+        kprint("\n");
     }
 }
 
@@ -54,7 +70,7 @@ void set_idt_handler(uint32_t num, uint64_t handler) {
     idt_handlers[num].reserved = (uint32_t)0;
 }
 
-void init_idt(void) {
+void install_isr(void) {
     idt_handlers_pointer.limit = 256 * sizeof(idt_entry_t) - 1;
     idt_handlers_pointer.base = (uint64_t) &idt_handlers;
 
@@ -91,5 +107,67 @@ void init_idt(void) {
     set_idt_handler(30, (uint64_t)isr_handler_30);
     set_idt_handler(31, (uint64_t)isr_handler_31);
 
+    // Remap the PIC
+    port_byte_out(0x20, 0x11);
+    port_byte_out(0xA0, 0x11);
+    port_byte_out(0x21, 0x20);
+    port_byte_out(0xA1, 0x28);
+    port_byte_out(0x21, 0x04);
+    port_byte_out(0xA1, 0x02);
+    port_byte_out(0x21, 0x01);
+    port_byte_out(0xA1, 0x01);
+    port_byte_out(0x21, 0x0);
+    port_byte_out(0xA1, 0x0);
+
+    // Install the IRQs
+    set_idt_handler(32, (uint64_t)irq_0);
+
+    set_idt_handler(33, (uint64_t)irq_1);
+    set_idt_handler(34, (uint64_t)irq_2);
+    set_idt_handler(35, (uint64_t)irq_3);
+    set_idt_handler(36, (uint64_t)irq_4);
+    set_idt_handler(37, (uint64_t)irq_5);
+    set_idt_handler(38, (uint64_t)irq_6);
+    set_idt_handler(39, (uint64_t)irq_7);
+    set_idt_handler(40, (uint64_t)irq_8);
+    set_idt_handler(41, (uint64_t)irq_9);
+    set_idt_handler(42, (uint64_t)irq_10);
+    set_idt_handler(43, (uint64_t)irq_11);
+    set_idt_handler(44, (uint64_t)irq_12);
+    set_idt_handler(45, (uint64_t)irq_13);
+    set_idt_handler(46, (uint64_t)irq_14);
+    set_idt_handler(47, (uint64_t)irq_15);
+
     load_idt();
+}
+
+void irq_handler(registers_t r) {
+    /* After every interrupt we need to send an EOI to the PICs
+     * or they will not send another interrupt again */
+    if (r.intNum >= 40) port_byte_out(0xA0, 0x20); /* slave */
+    port_byte_out(0x20, 0x20); /* master */
+
+    /* Handle the interrupt in a more modular way */
+    if (isr_handlers[r.intNum] != 0) {
+        isr_t handler = isr_handlers[r.intNum];
+        handler(&r);
+    }
+}
+
+void register_interrupt_handler(uint8_t n, isr_t handler) {
+
+    char str[3];
+    int_to_ascii(n, str);
+    kprint(str);
+
+    isr_handlers[n] = handler;
+}
+
+void install_irq() {
+//    /* Enable interruptions */
+    asm volatile("sti");
+    /* IRQ0: timer */
+    init_timer(50);
+    /* IRQ1: keyboard */
+    init_keyboard();
 }

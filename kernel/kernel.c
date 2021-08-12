@@ -3,9 +3,16 @@
 #include "kernel.h"
 #include <stdint.h>
 
-void kernel_main() {
-    init_idt();
+#include "../drivers/sound.h"
 
-    monitor_clear();
-    monitor_write("yo.");
+void kernel_main(void) {
+    install_isr();
+    install_irq();
+
+    // Sound works but I'm commenting this out so I don't kill my ears on every boot
+    // play_sound(128);
+
+    clear_screen();
+    kprint("AlpineOS 2021.0.1 booted successfully.\n");
+    kprint("Terminal coming soon(tm)\n>");
 }

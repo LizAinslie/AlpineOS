@@ -1,6 +1,6 @@
-[org 0x7c00]
+org 0x7c00
 
-[bits 16]
+bits 16
 main:
     mov [BOOT_DRIVE], dl ; Remember that the BIOS sets us the boot drive in 'dl' on boot
 
@@ -15,18 +15,18 @@ main:
 %include "boot/long_mode.asm"
 %include "boot/gdt.asm"
 
-[bits 16]
+bits 16
 load_kernel:
     mov bx, 0x1000
     mov es, bx
     mov bx, 0
 
-    mov dh, 25
+    mov dh, 34 ; sectors to load
     mov dl, [BOOT_DRIVE]
     call disk_load
     ret
 
-[bits 64]
+bits 64
 BEGIN_LM:
     call 0x10000 ; Give control to the kernel
     hlt

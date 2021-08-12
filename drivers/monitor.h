@@ -1,20 +1,20 @@
 #ifndef pearos_monitor_h
 #define pearos_monitor_h
 
-#define VIDEO_LOCATION 0xb8000
+#define VIDEO_ADDRESS 0xb8000
 #define MAX_ROWS 25
 #define MAX_COLS 80
-#define SIZE 25 * 80
+#define WHITE_ON_BLACK 0x0f
+#define RED_ON_WHITE 0xf4
 
-#define SPACE *" "
+/* Screen i/o ports */
+#define REG_SCREEN_CTRL 0x3d4
+#define REG_SCREEN_DATA 0x3d5
 
-#define SCREEN_CONTROL_PORT 0x3d4
-#define SCREEN_DATA_PORT 0x3d5
-
-void monitor_init(void);
-void monitor_clear(void);
-void monitor_write_char(char ch);
-void monitor_write(char* ch);
-void monitor_print_center(char* ch);
+/* Public kernel API */
+void clear_screen();
+void kprint_at(char* message, int col, int row);
+void kprint(char* message);
+void kprint_backspace();
 
 #endif

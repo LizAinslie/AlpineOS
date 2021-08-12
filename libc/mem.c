@@ -1,4 +1,4 @@
-#include "mem.h.keep"
+#include "mem.h"
 
 void memory_copy(uint8_t *source, uint8_t *dest, int nbytes) {
     int i;

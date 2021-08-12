@@ -1,4 +1,4 @@
-[bits 16]
+bits 16
 
 disk_load:
     pusha
